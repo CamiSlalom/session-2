@@ -10,3 +10,4 @@ The project documentation will be built during the bootcamp sessions.
 
 - [Project Overview](../docs/project-overview.md) - Overview of the project
 - [Functional Requirements](../docs/functional-requirements.md) - TODO app functional requirements and acceptance criteria
+- [UI Guidelines](../docs/ui-guidelines.md) - TypeScript-first UI standards, theme-based Tailwind spacing and palette usage, universal typography, and responsive viewport support matrix
