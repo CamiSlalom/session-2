@@ -95,7 +95,7 @@ jobs:
             results_table:
               - description: "Unit tests should be present (app.test.js/.ts in backend and App.test.js/.tsx in frontend)."
                 passed: ${{ steps.check_unit_tests.outcome == 'success' }}
-                error_message: "Unit test files not found. Expected packages/frontend/src/__tests__/App.test.js or App.test.tsx and packages/backend/__tests__/app.test.js or app.test.ts."
+                error_message: "Unit test files not found. Expected packages/frontend/src/__tests__/App.test.js (or .tsx) and packages/backend/__tests__/app.test.js (or .ts)."
               - description: "Integration tests should exist (intelligently named *.test.js files in packages/backend/__tests__/integration/)."
                 passed: ${{ steps.check_integration_tests.outcome == 'success' }}
                 error_message: "Integration test files not found in packages/backend/__tests__/integration/."
