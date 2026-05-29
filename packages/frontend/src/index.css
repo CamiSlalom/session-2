@@ -1,13 +1,40 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+:root {
+  --font-family-ui: 'Segoe UI', 'Helvetica Neue', sans-serif;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --text-default: #1f2933;
+  --text-muted: #52606d;
+  --surface-default: #ffffff;
+  --surface-soft: #f7fafc;
+  --surface-strong: #0f4c5c;
+  --border-soft: #d9e2ec;
+  --primary-action: #e76f51;
+  --primary-action-hover: #de5b3a;
+  --danger-action: #bc4749;
+  --danger-action-hover: #9b2c2e;
+  --focus-ring: #ffbf69;
+  --error-text: #9b2226;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family-ui);
+  color: var(--text-default);
+  background:
+    radial-gradient(circle at 10% 10%, rgba(231, 111, 81, 0.12), transparent 45%),
+    radial-gradient(circle at 80% 0%, rgba(15, 76, 92, 0.2), transparent 40%),
+    linear-gradient(120deg, #f8fbff 0%, #ecf4f8 60%, #fdf6ec 100%);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

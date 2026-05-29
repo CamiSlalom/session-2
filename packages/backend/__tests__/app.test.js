@@ -33,6 +33,8 @@ describe('API Endpoints', () => {
       const item = response.body[0];
       expect(item).toHaveProperty('id');
       expect(item).toHaveProperty('name');
+      expect(item).toHaveProperty('is_done');
+      expect(item).toHaveProperty('display_order');
       expect(item).toHaveProperty('created_at');
     });
   });
@@ -48,6 +50,8 @@ describe('API Endpoints', () => {
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id');
       expect(response.body.name).toBe(newItem.name);
+      expect(response.body.is_done).toBe(0);
+      expect(response.body).toHaveProperty('display_order');
       expect(response.body).toHaveProperty('created_at');
     });
 
@@ -71,6 +75,80 @@ describe('API Endpoints', () => {
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty('error');
       expect(response.body.error).toBe('Item name is required');
+    });
+  });
+
+  describe('PATCH /api/items/:id', () => {
+    it('should toggle an item when isDone is omitted', async () => {
+      const item = await createItem('Item to Toggle Without Payload');
+
+      const response = await request(app).patch(`/api/items/${item.id}`).send({});
+      expect(response.status).toBe(200);
+      expect(response.body.id).toBe(item.id);
+      expect(response.body.is_done).toBe(1);
+
+      const secondResponse = await request(app).patch(`/api/items/${item.id}`).send({});
+      expect(secondResponse.status).toBe(200);
+      expect(secondResponse.body.is_done).toBe(0);
+    });
+
+    it('should update completion state when isDone is provided', async () => {
+      const item = await createItem('Item to Set Done');
+
+      const doneResponse = await request(app)
+        .patch(`/api/items/${item.id}`)
+        .send({ isDone: true });
+
+      expect(doneResponse.status).toBe(200);
+      expect(doneResponse.body.is_done).toBe(1);
+
+      const undoneResponse = await request(app)
+        .patch(`/api/items/${item.id}`)
+        .send({ isDone: false });
+
+      expect(undoneResponse.status).toBe(200);
+      expect(undoneResponse.body.is_done).toBe(0);
+    });
+
+    it('should return 400 when isDone is invalid', async () => {
+      const item = await createItem('Item with Invalid Done Payload');
+
+      const response = await request(app)
+        .patch(`/api/items/${item.id}`)
+        .send({ isDone: 'yes' });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'isDone must be a boolean when provided');
+    });
+  });
+
+  describe('PATCH /api/items/reorder', () => {
+    it('should reorder items when all IDs are provided', async () => {
+      const allItemsResponse = await request(app).get('/api/items');
+      expect(allItemsResponse.status).toBe(200);
+
+      const originalIds = allItemsResponse.body.map((item) => item.id);
+      const reorderedIds = [...originalIds].reverse();
+
+      const response = await request(app)
+        .patch('/api/items/reorder')
+        .send({ orderedIds: reorderedIds });
+
+      expect(response.status).toBe(200);
+      expect(response.body.map((item) => item.id)).toEqual(reorderedIds);
+    });
+
+    it('should return 400 when orderedIds does not include all existing IDs', async () => {
+      const allItemsResponse = await request(app).get('/api/items');
+      expect(allItemsResponse.status).toBe(200);
+
+      const partial = allItemsResponse.body.slice(0, 2).map((item) => item.id);
+      const response = await request(app)
+        .patch('/api/items/reorder')
+        .send({ orderedIds: partial });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'orderedIds must include all existing item IDs');
     });
   });
 
