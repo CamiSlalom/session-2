@@ -13,6 +13,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --coverage --watchAll=false",
+    "test:unit": "react-scripts test --coverage --watchAll=false --testPathPattern='src/__tests__/.*\\.test\\.(js|ts)$'",
     "test:watch": "react-scripts test --coverage",
     "eject": "react-scripts eject"
   },

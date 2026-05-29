@@ -5,7 +5,9 @@
   "main": "src/index.js",
   "scripts": {
     "start": "nodemon src/index.js",
-    "test": "jest --detectOpenHandles"
+    "test": "jest --detectOpenHandles",
+    "test:unit": "jest --detectOpenHandles --testPathPattern='__tests__/.*\\.test\\.(js|ts)$'",
+    "test:integration": "jest --detectOpenHandles --testPathPattern='__tests__/integration/.*\\.test\\.(js|ts)$' --passWithNoTests"
   },
   "dependencies": {
     "better-sqlite3": "^11.10.0",
