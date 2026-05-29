@@ -137,6 +137,51 @@ describe('App Component', () => {
     });
   });
 
+  test('shows validation error when adding an empty task name', async () => {
+    const user = userEvent.setup();
+
+    await act(async () => {
+      render(<App />);
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByText('Loading data...')).not.toBeInTheDocument();
+    });
+
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: 'Add Task' }));
+    });
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Please enter a task name before adding.');
+  });
+
+  test('shows API error when adding a task fails', async () => {
+    const user = userEvent.setup();
+
+    server.use(
+      rest.post('/api/items', async (req, res, ctx) => {
+        return res(ctx.status(500), ctx.json({ error: 'Create failed' }));
+      })
+    );
+
+    await act(async () => {
+      render(<App />);
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByText('Loading data...')).not.toBeInTheDocument();
+    });
+
+    await act(async () => {
+      await user.type(screen.getByLabelText('Task name'), 'Will Fail');
+      await user.click(screen.getByRole('button', { name: 'Add Task' }));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('Error adding item: Create failed');
+    });
+  });
+
   test('toggles a task as done', async () => {
     const user = userEvent.setup();
 
@@ -175,6 +220,33 @@ describe('App Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Failed to fetch data/)).toBeInTheDocument();
+    });
+  });
+
+  test('restores deleted item when delete request fails', async () => {
+    const user = userEvent.setup();
+
+    server.use(
+      rest.delete('/api/items/:id', (req, res, ctx) => {
+        return res(ctx.status(500), ctx.json({ error: 'Delete failed' }));
+      })
+    );
+
+    await act(async () => {
+      render(<App />);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Item 1')).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      await user.click(screen.getAllByRole('button', { name: 'Delete' })[0]);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('Error deleting item: Delete failed');
+      expect(screen.getByText('Test Item 1')).toBeInTheDocument();
     });
   });
 

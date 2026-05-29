@@ -21,6 +21,15 @@ const createItem = async (name = 'Temp Item to Delete') => {
 };
 
 describe('API Endpoints', () => {
+  describe('GET /', () => {
+    it('should return backend health status', async () => {
+      const response = await request(app).get('/');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ status: 'ok', message: 'Backend server is running' });
+    });
+  });
+
   describe('GET /api/items', () => {
     it('should return all items', async () => {
       const response = await request(app).get('/api/items');
@@ -79,6 +88,20 @@ describe('API Endpoints', () => {
   });
 
   describe('PATCH /api/items/:id', () => {
+    it('should return 400 for invalid item id', async () => {
+      const response = await request(app).patch('/api/items/not-a-number').send({ isDone: true });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Valid item ID is required');
+    });
+
+    it('should return 404 when item does not exist', async () => {
+      const response = await request(app).patch('/api/items/999999').send({ isDone: true });
+
+      expect(response.status).toBe(404);
+      expect(response.body).toHaveProperty('error', 'Item not found');
+    });
+
     it('should toggle an item when isDone is omitted', async () => {
       const item = await createItem('Item to Toggle Without Payload');
 
@@ -123,6 +146,43 @@ describe('API Endpoints', () => {
   });
 
   describe('PATCH /api/items/reorder', () => {
+    it('should return 400 when orderedIds is empty', async () => {
+      const response = await request(app)
+        .patch('/api/items/reorder')
+        .send({ orderedIds: [] });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'orderedIds must be a non-empty array of item IDs');
+    });
+
+    it('should return 400 when orderedIds has duplicates', async () => {
+      const allItemsResponse = await request(app).get('/api/items');
+      expect(allItemsResponse.status).toBe(200);
+
+      const firstId = allItemsResponse.body[0].id;
+      const response = await request(app)
+        .patch('/api/items/reorder')
+        .send({ orderedIds: [firstId, firstId] });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'orderedIds must not contain duplicates');
+    });
+
+    it('should return 400 when orderedIds contains non-numeric values', async () => {
+      const allItemsResponse = await request(app).get('/api/items');
+      expect(allItemsResponse.status).toBe(200);
+
+      const existingIds = allItemsResponse.body.map((item) => item.id);
+      const withBadId = [...existingIds.slice(1), 'bad-id'];
+
+      const response = await request(app)
+        .patch('/api/items/reorder')
+        .send({ orderedIds: withBadId });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'orderedIds must contain only numeric item IDs');
+    });
+
     it('should reorder items when all IDs are provided', async () => {
       const allItemsResponse = await request(app).get('/api/items');
       expect(allItemsResponse.status).toBe(200);
